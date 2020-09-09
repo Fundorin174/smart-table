@@ -6,7 +6,7 @@ import SmartTable from './components/SmartTable/SmartTable';
 
 function App() {
 
-  let [isDataLoading, setData] = useState(false);
+  let [isDataLoading, setDataLoadingFlag] = useState(false);
   let dataRef = useRef('');
    useEffect(()=>{
     async function getTableData () {
@@ -14,15 +14,15 @@ function App() {
       const response = await fetch(url);
       let data = await response.json();
       dataRef.current = await data;  
-      setData(true);
+      setDataLoadingFlag(true);
       }
     getTableData();  
 
   },[isDataLoading]);
 
   return (
-    <Container className="Container">
-     { !isDataLoading ? <Loader /> : <SmartTable />}
+    <Container className="Container mt-3">
+     { !isDataLoading ? <Loader /> : <SmartTable data={dataRef.current} />}
     </Container>
   );
 }
