@@ -1,20 +1,44 @@
 import React, { useState, useEffect } from 'react';
-import { Container } from 'react-bootstrap';
+import { Container, InputGroup, FormControl, Form } from 'react-bootstrap';
 import { Table } from 'react-bootstrap';
 import _ from 'lodash';
+import PaginationBlock from '../PaginationBlock/PaginationBlock';
 
 export default function SmartTable(props) {
 
-    let [data, setData] = useState(props.data);
-    let [dirOfSort, toggleDirOfSort] = useState('asc')//||desc
-    let [selectedColumn, SetSelectedColumn] = useState('')//
+    let [data, setData] = useState([]);
+    let [dirOfSort, toggleDirOfSort] = useState('asc');//||desc
+    let [selectedColumn, setSelectedColumn] = useState('');//
+    let [numOfPages, setNumofPages] = useState(1);
+    let [paginatedData, setPaginatedData] = useState([]);
+    let [itemPerPageCount, setitemPerPageCount] = useState([10]);
 
 
-    useEffect(()=>{
+    useEffect(() => {
         sortBySomeColumn('id');
     }, []);
 
-    let tableRows = data.map(client => {
+    useEffect(() => {
+        createPaginationArray();
+    }, [data, itemPerPageCount]);
+
+    const createPaginationArray = () => {
+        let paginatedData = [];
+        const numOfPages = Math.ceil(data.length / itemPerPageCount);
+        setNumofPages(numOfPages);
+        for (let i = 0; i < numOfPages; i++) {
+            let startRow = (i) * itemPerPageCount;
+            let finishRow = startRow + itemPerPageCount;
+            paginatedData = [...paginatedData, data.slice(startRow, finishRow)]
+            setPaginatedData(paginatedData)
+        }
+    }
+
+    const changeItemPerPageCount = (num)=> {
+        num > 0 && num < data.length ? setitemPerPageCount(num) : num < data.length ? setitemPerPageCount(1) : setitemPerPageCount(data.length);
+    }
+
+    let tableRows = paginatedData[0]?.map(client => {
         return (
             <tr key={client.id + client.firstname}>
                 <td>{client.id}</td>
@@ -30,21 +54,24 @@ export default function SmartTable(props) {
         let sortData = _.orderBy(props.data, [columnName], [dirOfSort])
         setData(sortData);
         dirOfSort === 'asc' ? toggleDirOfSort('desc') : toggleDirOfSort('asc');
-        SetSelectedColumn(columnName);
+        setSelectedColumn(columnName);
     }
 
-    const sortArrow = dirOfSort==='asc' ? <span>&#9660;</span> : <span>&#9650;</span>;
+    const sortArrow = dirOfSort === 'asc' ? <span>&#9660;</span> : <span>&#9650;</span>;
 
     return (
         <Container>
+            <PaginationBlock numOfPages={numOfPages} />
+            <label htmlFor="basic-url">Вывести строк:</label>
+            <Form.Control type="number" value={itemPerPageCount || '10'} onChange = {(e) => changeItemPerPageCount(e.target.value)}/>
             <Table striped bordered hover>
                 <thead>
                     <tr>
-                        <th onClick={sortBySomeColumn.bind(null, 'id')}>ID {selectedColumn ==='id' && sortArrow}</th>
-                        <th onClick={sortBySomeColumn.bind(null, 'firstname')}>First Name {selectedColumn ==='firstname' && sortArrow}</th>
-                        <th onClick={sortBySomeColumn.bind(null, 'lastname')}>Last Name {selectedColumn ==='lastname' && sortArrow}</th>
-                        <th onClick={sortBySomeColumn.bind(null, 'email')}>email {selectedColumn ==='email' && sortArrow}</th>
-                        <th onClick={sortBySomeColumn.bind(null, 'phone')} className='d-flex justify-content-center'>phone {selectedColumn ==='phone' && sortArrow}</th>
+                        <th onClick={sortBySomeColumn.bind(null, 'id')}>ID {selectedColumn === 'id' && sortArrow}</th>
+                        <th onClick={sortBySomeColumn.bind(null, 'firstname')}>First Name {selectedColumn === 'firstname' && sortArrow}</th>
+                        <th onClick={sortBySomeColumn.bind(null, 'lastname')}>Last Name {selectedColumn === 'lastname' && sortArrow}</th>
+                        <th onClick={sortBySomeColumn.bind(null, 'email')}>email {selectedColumn === 'email' && sortArrow}</th>
+                        <th onClick={sortBySomeColumn.bind(null, 'phone')} className='d-flex justify-content-center'>phone {selectedColumn === 'phone' && sortArrow}</th>
                     </tr>
                 </thead>
                 <tbody>
