@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Form } from 'react-bootstrap';
+import { Container, Form, Button } from 'react-bootstrap';
 import { Table } from 'react-bootstrap';
 import _ from 'lodash';
 import PaginationBlock from '../PaginationBlock/PaginationBlock';
@@ -13,12 +13,13 @@ export default function SmartTable(props) {
     let [paginatedData, setPaginatedData] = useState([]);
     let [itemPerPageCount, setitemPerPageCount] = useState([10]);
     let [activePage, setActivePage] = useState(0);
+    let [userFilterData, setUserFilterData] = useState('');
+
 
 
     useEffect(() => {
         sortBySomeColumn('id');
     }, []);
-
 
     useEffect(() => {
         createPaginationArray();
@@ -51,6 +52,17 @@ export default function SmartTable(props) {
                 }
     }
 
+    const sortBySomeColumn = (columnName) => {
+        let sortData = _.orderBy(props.data, [columnName], [dirOfSort])
+        setData(prevData => prevData = sortData);
+        dirOfSort === 'asc' ? toggleDirOfSort('desc') : toggleDirOfSort('asc');
+        setSelectedColumn(columnName);
+    }
+
+    const changeUserFilterData = (text) => {
+        setUserFilterData(text);
+    }
+
     let tableRows = paginatedData[activePage]?.map(client => {
         return (
             <tr key={client.id + client.firstname}>
@@ -63,20 +75,23 @@ export default function SmartTable(props) {
         );
     })
 
-    const sortBySomeColumn = (columnName) => {
-        let sortData = _.orderBy(props.data, [columnName], [dirOfSort])
-        setData(sortData);
-        dirOfSort === 'asc' ? toggleDirOfSort('desc') : toggleDirOfSort('asc');
-        setSelectedColumn(columnName);
-    }
+
 
     const sortArrow = dirOfSort === 'asc' ? <span>&#9660;</span> : <span>&#9650;</span>;
 
     return (
         <Container>
             <PaginationBlock numOfPages={numOfPages} setActivePage={setActivePage} />
-            <label htmlFor="number-input">Вывести строк:</label>
-            <Form.Control className={'col-md-1 number-input d-inline'} type="number" value={itemPerPageCount || '10'} onChange={(e) => changeItemPerPageCount(e.target.value)} />
+                    <Form.Group className={'d-flex align-items-center'}>
+                    <Form.Label>Поиск по таблице:</Form.Label>
+                    <Form.Control className={'col-md-3 number-input d-inline ml-2 mr-2'} type="text" placeholder="Фильтр" value = {userFilterData} onChange = {e => changeUserFilterData(e.target.value)}/>
+                    <Button onClick = {()=>props.setUsersFilter(userFilterData)} variant="secondary" type="submit">Найти</Button>
+                    </Form.Group>
+                    <br/>
+                    <label htmlFor="number-input">Вывести строк:</label>
+                    <Form.Control className={'col-md-1 number-input d-inline'} type="number" value={itemPerPageCount || '10'} onChange={(e) => changeItemPerPageCount(e.target.value)} />
+
+            
             <Table striped bordered hover>
                 <thead>
                     <tr>
