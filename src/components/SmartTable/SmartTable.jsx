@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Container, InputGroup, FormControl, Form } from 'react-bootstrap';
+import { Container, Form } from 'react-bootstrap';
 import { Table } from 'react-bootstrap';
 import _ from 'lodash';
 import PaginationBlock from '../PaginationBlock/PaginationBlock';
@@ -12,15 +12,18 @@ export default function SmartTable(props) {
     let [numOfPages, setNumofPages] = useState(1);
     let [paginatedData, setPaginatedData] = useState([]);
     let [itemPerPageCount, setitemPerPageCount] = useState([10]);
+    let [activePage, setActivePage] = useState(0);
 
 
     useEffect(() => {
         sortBySomeColumn('id');
     }, []);
 
+
     useEffect(() => {
         createPaginationArray();
     }, [data, itemPerPageCount]);
+
 
     const createPaginationArray = () => {
         let paginatedData = [];
@@ -28,9 +31,9 @@ export default function SmartTable(props) {
         setNumofPages(numOfPages);
         for (let i = 0; i < numOfPages; i++) {
             let startRow = (i) * itemPerPageCount;
-            let finishRow = startRow + itemPerPageCount;
+            let finishRow = startRow + +itemPerPageCount;
             paginatedData = [...paginatedData, data.slice(startRow, finishRow)]
-            setPaginatedData(paginatedData)
+            setPaginatedData(paginatedData);
         }
     }
 
@@ -38,7 +41,7 @@ export default function SmartTable(props) {
         num > 0 && num < data.length ? setitemPerPageCount(num) : num < data.length ? setitemPerPageCount(1) : setitemPerPageCount(data.length);
     }
 
-    let tableRows = paginatedData[0]?.map(client => {
+    let tableRows = paginatedData[activePage]?.map(client => {
         return (
             <tr key={client.id + client.firstname}>
                 <td>{client.id}</td>
@@ -61,9 +64,9 @@ export default function SmartTable(props) {
 
     return (
         <Container>
-            <PaginationBlock numOfPages={numOfPages} />
-            <label htmlFor="basic-url">Вывести строк:</label>
-            <Form.Control type="number" value={itemPerPageCount || '10'} onChange = {(e) => changeItemPerPageCount(e.target.value)}/>
+            <PaginationBlock numOfPages={numOfPages} setActivePage = {setActivePage}/>
+            <label htmlFor="number-input">Вывести строк:</label>
+            <Form.Control className={'col-md-1 number-input d-inline'} type="number" value={itemPerPageCount || '10'} onChange = {(e) => changeItemPerPageCount(e.target.value)}/>
             <Table striped bordered hover>
                 <thead>
                     <tr>
