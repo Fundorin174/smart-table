@@ -37,8 +37,18 @@ export default function SmartTable(props) {
         }
     }
 
-    const changeItemPerPageCount = (num)=> {
-        num > 0 && num < data.length ? setitemPerPageCount(num) : num < data.length ? setitemPerPageCount(1) : setitemPerPageCount(data.length);
+    const changeItemPerPageCount = (num) => {
+        if (num > 0 && num < data.length && data.length < 50) {
+            setitemPerPageCount(num);
+        } else
+            if (num < data.length && data.length < 50) {
+                setitemPerPageCount(1);
+            } else
+                if (num > data.length && data.length < 50) {
+                    setitemPerPageCount(data.length);
+                } else {
+                    setitemPerPageCount(50);
+                }
     }
 
     let tableRows = paginatedData[activePage]?.map(client => {
@@ -64,9 +74,9 @@ export default function SmartTable(props) {
 
     return (
         <Container>
-            <PaginationBlock numOfPages={numOfPages} setActivePage = {setActivePage}/>
+            <PaginationBlock numOfPages={numOfPages} setActivePage={setActivePage} />
             <label htmlFor="number-input">Вывести строк:</label>
-            <Form.Control className={'col-md-1 number-input d-inline'} type="number" value={itemPerPageCount || '10'} onChange = {(e) => changeItemPerPageCount(e.target.value)}/>
+            <Form.Control className={'col-md-1 number-input d-inline'} type="number" value={itemPerPageCount || '10'} onChange={(e) => changeItemPerPageCount(e.target.value)} />
             <Table striped bordered hover>
                 <thead>
                     <tr>
