@@ -7,7 +7,6 @@ import SmartTable from './components/SmartTable/SmartTable';
 function App() {
 
   let [isDataLoading, setDataLoadingFlag] = useState(false);
-  let [usersFilter, setUsersFilter] = useState('');//сюда не приходит данные из таблицы
   let dataRef = useRef('');
    useEffect(()=>{
     async function getTableData () {
@@ -15,33 +14,18 @@ function App() {
       const response = await fetch(url);
       let data = await response.json();
       dataRef.current = await data;  
-      await filterDataByUser(usersFilter);
       setDataLoadingFlag(true);
       }
     getTableData();  
 
   },[isDataLoading]);
 
-  // useEffect(()=>{
-  //   console.log(usersFilter)
-  //   filterDataByUser(usersFilter);
-  // }, [usersFilter]);
 
-  const filterDataByUser = (usersData) => {        
-    let filteredData = dataRef.current?.filter((row)=>
-        row.id.toString().toLowerCase().includes(usersData.toLowerCase()) ||
-        row.firstname.toString().toLowerCase().includes(usersData.toLowerCase()) ||
-        row.lastname.toString().toLowerCase().includes(usersData.toLowerCase()) ||
-        row.email.toString().toLowerCase().includes(usersData.toLowerCase()) ||
-        row.phone.toString().toLowerCase().includes(usersData.toLowerCase())
-        );
-        dataRef.current = filteredData;  
 
-}
 
   return (
     <Container className="Container mt-3">
-     { !isDataLoading ? <Loader /> : <SmartTable data={dataRef.current} setUsersFilter={setUsersFilter} />}
+     { !isDataLoading ? <Loader /> : <SmartTable data={dataRef.current}  />}
     </Container>
   );
 }
